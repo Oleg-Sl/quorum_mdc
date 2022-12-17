@@ -64,7 +64,7 @@
 					console.log("username = ", username);
 					console.log("password = ", password);
 					if (username && password) {
-						await saveAuth(username && password);
+						await saveAuth(username, password);
 						setTimeout(BX24.installFinish, 5000);
 					}
 				})
