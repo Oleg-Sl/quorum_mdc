@@ -27,7 +27,10 @@ def create_secrets_bx24(data):
 """ Обновление токенов доступа BX24 """
 def update_secrets_bx24(auth_token, expires_in, refresh_token):
     with open(filename_secrets_bx24) as secrets_file:
-        data = json.load(secrets_file)
+        try:
+            data = json.load(secrets_file)
+        except JSONDecodeError:
+            data = {}
 
     data["auth_token"] = auth_token
     data["expires_in"] = expires_in
@@ -40,15 +43,20 @@ def update_secrets_bx24(auth_token, expires_in, refresh_token):
 """ Получение значения секрета BX24 по ключу """
 def get_secret_bx24(key):
     with open(filename_secrets_bx24, "w+") as secrets_file:
-        data = json.load(secrets_file)
-
-    return data.get(key)
+        try:
+            data = json.load(secrets_file)
+        except JSONDecodeError:
+            data = {}
+        return data.get(key)
 
 
 """ Получение всех секретов BX24 """
 def get_secrets_all_bx24():
     with open(filename_secrets_bx24, "w+") as secrets_file:
-        data = json.load(secrets_file)
+        try:
+            data = json.load(secrets_file)
+        except JSONDecodeError:
+            data = {}
 
     return data
 
