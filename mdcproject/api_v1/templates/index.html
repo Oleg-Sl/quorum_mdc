@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Title</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+        {% load static %}
+        <script>
+            window.onload = async function() {
+                let domen = "{{domain}}";
+                let url_path = "{{url_path}}";
+
+                let pathContactPing = "status-merge-contacts";
+                let pathContactMerge = "merge-contacts";
+                let pathReportFilename = "report";
+                let pathReportDownload = "report-download";
+
+                let urlContactPing = `${domen}/${url_path}/api/v1/status-merge-contacts/`;
+                let urlContactMerge = `${domen}/${url_path}/api/v1/merge-contacts/`;
+                let urlReportFilename = `${domen}/${url_path}/api/v1/report/`;
+                let urlReportDownload = `${domen}/${url_path}/api/v1/report-download/`;
+                console.log('urlContactPing = ', urlContactPing);
+                console.log('urlContactMerge = ', urlContactMerge);
+                console.log('urlReportFilename = ', urlReportFilename);
+                console.log('urlReportDownload = ', urlReportDownload);
+
+                let btnMerge = document.querySelector("#btn-merge");
+                let progressContact = document.querySelector("#progress-contact .progress-bar");
+                let progressCompanies = document.querySelector("#progress-companies .progress-bar");
+                let progressDeals = document.querySelector("#progress-deals .progress-bar");
+                let progressContactCompany = document.querySelector("#progress-contact-company .progress-bar");
+                let progressContactDeal = document.querySelector("#progress-contact-deal .progress-bar");
+                let progressDuplicates = document.querySelector("#progress-duplicates .progress-bar");
+                let countDuplicates = document.querySelector("#countDuplicates");
+                let responsibleContactInput = document.querySelector("#responsibleContactInput");
+                let methodMerge = document.querySelector("#methodMerge");
+                let reportList = document.querySelector("#reportList tbody");
+
+                this.request = new Request(domen, url_path);
+                await this.request.init();
+
+                let timerId = setInterval(ping, 1000);
+
+                async function ping() {
+                    let response = await this.request.GET(pathContactPing);
+                    if (!response.error) {
+                        renderProgressBar(response.result);
+                    }
+                    // try {
+                    //     let response = await fetch(urlContactPing);
+                    //     let result = await response.json();
+                    //     renderProgressBar(result)
+                    // } catch(err) {
+                    //     console.log(err);
+                    // }
+                }
+
+                function renderProgressBar(res) {
+                    console.log(res);
+                    if (res.status) {
+                        btnMerge.disabled = true;
+                        if (res.contacts) {
+                            let percentContacts = getPercent(res.contacts.start, res.contacts.actual);
+                            progressContact.style.width = `${percentContacts}%`;
+                            console.log("percentContacts = ", percentContacts);
+                        }
+                        if (res.companies) {
+                            let percentCompanies = getPercent(res.companies.start, res.companies.actual);
+                            progressCompanies.style.width = `${percentCompanies}%`;
+                            console.log("percentCompanies = ", percentCompanies);
+                        }
+                        if (res.deals) {
+                            let percentDeals = getPercent(res.deals.start, res.deals.actual);
+                            progressDeals.style.width = `${percentDeals}%`;
+                            console.log("percentDeals = ", percentDeals);
+                        }
+                        if (res.contact_company) {
+                            let percentContactCompany = getPercent(res.contact_company.start, res.contact_company.actual);
+                            progressContactCompany.style.width = `${percentContactCompany}%`;
+                            console.log("percentContactCompany = ", percentContactCompany);
+                        }
+                        if (res.contact_deal) {
+                            let percentContactDeal = getPercent(res.contact_deal.start, res.contact_deal.actual);
+                            progressContactDeal.style.width = `${percentContactDeal}%`;
+                            console.log("percentContactDeal = ", percentContactDeal);
+                        }
+                        if (res.duplicates) {
+                            countDuplicates.innerHTML = res.duplicates.start;
+                            let percentDuplicates = getPercent(res.duplicates.start, res.duplicates.actual);
+                            progressDuplicates.style.width = `${percentDuplicates}%`;
+                            console.log("percentDuplicates = ", percentDuplicates);
+                        }
+                    } else {
+                        btnMerge.disabled = false;
+                        getFilenames();
+                    }
+                }
+
+                function getPercent(total, actual_count) {
+                    if (total) {
+                        return 100 * (total - actual_count) / total;
+                    }
+                    return 0;
+                }
+
+                function setZeroProgressbar() {
+                    progressContact.style.width = `0%`;
+                    progressCompanies.style.width = `0%`;
+                    progressDeals.style.width = `0%`;
+                    progressContactCompany.style.width = `0%`;
+                    progressContactDeal.style.width = `0%`;
+                    progressDuplicates.style.width = `0%`;
+                }
+
+                function getMethodMerge() {
+                    return methodMerge.value;
+                }
+
+                async function getFilenames() {
+                    let response = await this.request.GET(pathReportFilename);
+                    if (!response.error) {
+                        renderFilenames(response.result);
+                    }
+                    // try {
+                    //     let response = await fetch(urlReportFilename);
+                    //     let result = await response.json();
+                    //     renderFilenames(result);
+                    // } catch(err) {
+                    //     console.log(err);
+                    // }
+                }
+
+                function renderFilenames(filenames) {
+                    html = '';
+                    for (filename of filenames) {
+                        html += `
+                        <tr data-filename="${filename}">
+                            <td><a href="${urlReportDownload}?file=${filename}">${filename}</a> <br></td>
+                            <td class="remove" title="Удалить файл" data-filename="${filename}"><button type="button" class="btn-close" aria-label="Close"></button></td>
+                        </tr>
+                        `;
+                    }
+                    reportList.innerHTML = html;
+                }
+
+                btnMerge.addEventListener("click", async (e) => {
+                    let response = await this.request.POST(
+                        pathContactMerge,
+                        {
+                            "method": getMethodMerge(),
+                            "assigned_id": responsibleContactInput.value
+                        }
+                    );
+                    if (!response.error) {
+                        setZeroProgressbar();
+                    }
+                    // try {
+                    //     let response = await fetch(
+                    //         urlContactMerge,
+                    //         {
+                    //             method: 'POST',
+                    //             headers: {
+                    //                 'Accept': 'application/json',
+                    //                 'Content-Type': 'application/json'
+                    //             },
+                    //             body: JSON.stringify({
+                    //                 "method": getMethodMerge(),
+                    //                 "assigned_id": responsibleContactInput.value
+                    //              })
+                    //         }
+                    //     );
+                    //     let result = await response.json();
+                    //     console.log('Результат нажатия кнопки "Объединить"', result);
+                    //     setZeroProgressbar();
+                    // } catch(err) {
+                    //     console.log('Результат нажатия кнопки "Объединить"', err);
+                    // }
+                })
+
+                reportList.addEventListener('click', async (e)=> {
+                    if (e.target.tagName == 'BUTTON') {
+                        let tr = e.target.closest('tr');
+                        let filename = tr.dataset.filename;
+                        deleteFile(filename);
+                    }
+                });
+
+                async function deleteFile(filename) {
+                    let data = {};
+                    let params = {
+                        file: filename,
+                    };
+                    let response = await this.request.DELETE(pathReportDownload, data, params);
+                    // if (!response.error) {
+                    //     renderFilenames(response.result);
+                    // }
+                    // try {
+                    //     let url = urlReportDownload + `?file=${filename}`;
+                    //     console.log("url = ", url);
+                    //     let response = await fetch(url, {method: 'DELETE'});
+                    // } catch(err) {
+                    //     console.log(err);
+                    // }
+                }
+
+                getFilenames();
+            }
+        </script>
+
+        <script>
+            class Auth {
+                    constructor(DOMAIN, PATH) {
+                        this.domain = `${DOMAIN}/${PATH}`;
+                        // this.domain = domain;
+                        this.access = null;
+                        this.accessExp = null;
+                        this.refresh = null;
+                        this.refreshExp = null;
+                    }
+
+                    async init() {
+                        await this.storageGetTokens();
+                        if (!this.access || !this.refresh) {
+                            let username = await this.storageGetUsername();
+                            let password = await this.storageGetPassword();
+                            let userRegistration = await this.serverRegistrationUser(username, password);
+                            let tokens = await this.serverCreateToken(username, password);
+                            let resSaveTokens = await this.storageSaveTokens(tokens.access, tokens.refresh);
+                        }
+                    }
+
+                    // получение токена доступа, при его просрочке - обновление, при отсутствии - получение
+                    async getAccessToken() {
+                        let isRefreshToken = this.isRefreshTokenExpired();
+                        // если токен обновления просрочен
+                        if (!isRefreshToken) {
+                            console.log("Создание нового токена");
+                            let username = await this.storageGetUsername();
+                            let password = await this.storageGetPassword();
+                            let tokens = await this.serverCreateToken(username, password);
+                            let resSaveTokens = await this.storageSaveTokens(tokens.access, tokens.refresh);
+                        }
+                        let isAccessToken = this.isAccessTokenExpired();
+                        // если токен доступа просрочен
+                        if (!isAccessToken) {
+                            console.log("Обновление токена");
+                            let tokens = await this.serverRefreshToken(this.refresh);
+                            let resSaveTokens = await this.storageSaveTokens(tokens.access, tokens.refresh);
+                        }
+                        return this.access;
+                    }
+
+                    // возвращает имя пользователя из хранилиша
+                    async storageGetUsername() {
+                        let username = await BX24.appOption.get("username_use_app");
+                        return username;
+                    }
+                
+                    // возвращает пароль зарегистрированного пользователя из хранилиша
+                    async storageGetPassword() {
+                        let password = await BX24.appOption.get("passwd_use_app");
+                        return password;
+                    }
+
+                    // возвращает данные сохраненных токенов из хранилища
+                    async storageGetTokens() {
+                        this.access = await BX24.userOption.get("accessToken");
+                        this.accessExp = await BX24.userOption.get("accessExp");
+                        this.refresh = await BX24.userOption.get("refreshToken");
+                        this.refreshExp = await BX24.userOption.get("refreshExp");
+                    }
+
+                    // сохранение токенов в хранилище пользователя
+                    async storageSaveTokens(accessToken, refreshToken) {
+                        try {
+                            this.access = accessToken;
+                            this.refresh = refreshToken;
+
+                            let [headerAccess, dataAccess, signAccess] = accessToken.split(".");
+                            let [headerRefresh, dataRefresh, signRefresh] = refreshToken.split(".");
+                            
+                            let dataAccessObj = JSON.parse(atob(dataAccess));
+                            let dataRefreshObj = JSON.parse(atob(dataRefresh));
+
+                            this.accessExp = dataAccessObj["exp"];
+                            this.refreshExp = dataRefreshObj["exp"];
+                            
+                            await BX24.userOption.set("accessToken", this.access);
+                            await BX24.userOption.set("accessExp", this.accessExp);
+
+                            await BX24.userOption.set("refreshToken", this.refresh);
+                            await BX24.userOption.set("refreshExp", this.refreshExp);
+                            
+                            return true;
+                        } catch {
+                            console.warn("Не удалось сохранить токены.");
+                        }
+                    }
+
+                    // проверка валидности токена доступа: false - access токен просрочен, иначе - true
+                    isAccessTokenExpired() {
+                        const accessTokenExpDate = this.accessExp - 180;
+                        const nowTime = Math.floor(new Date().getTime() / 1000);
+                        return accessTokenExpDate > nowTime;
+                    }
+
+                    // проверка валидности токена обновления: false - refresh токен просрочен, иначе - true
+                    isRefreshTokenExpired() {
+                        const refreshTokenExpDate = this.refreshExp - 180;
+                        const nowTime = Math.floor(new Date().getTime() / 1000);
+                        return refreshTokenExpDate > nowTime;
+                    }
+
+                    // регистрация пользователя на сервере
+                    async serverRegistrationUser(username, password) {
+                        let url = this.domain + "/auth/users/";
+                        return fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username,
+                                password
+                            }),
+                        }).then(async (res) => {
+                            const data = await res.json();
+                            if (res.status === 201) {
+                                return Promise.resolve(data);
+                            }
+                            if (res.status === 400 && data.username[0] == "A user with that username already exists.") {
+                                return Promise.resolve(data);
+                            }
+                            console.error(`Ошибка регистрации пользователя: ${data}`);
+                            return Promise.reject();
+                        });
+                    }
+
+                    // создание токена по логину и паролю
+                    async serverCreateToken(username, password) {
+                        let url = this.domain + "/auth/jwt/create/";
+                        return fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: username,
+                                password: password
+                            }),
+                        }).then(async (res) => {
+                            const data = await res.json();
+                            if (res.status === 200) {
+                                return Promise.resolve(data);
+                            }
+                            console.error(`Ошибка создания токена: ${data}`);
+                            return Promise.reject();
+                        });
+                    }
+
+                    // обновление токенов
+                    async serverRefreshToken(refreshToken) {
+                        let url = this.domain + "/auth/jwt/refresh/";
+                        return fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                refresh: refreshToken
+                            }),
+                        }).then(async (res) => {
+                            const data = await res.json();
+                            if (res.status === 200) {
+                                return Promise.resolve(data);
+                            }
+                            console.error(`Ошибка обновления токена: ${data}`);
+                            return Promise.reject();
+                        });
+                    }
+                }
+
+            class Request {
+                constructor(DOMAIN, PATH) {
+                    this.api = `${DOMAIN}/${PATH}/api/v1/`;
+                    this.auth = new Auth(DOMAIN, PATH);
+                }
+
+                async init() {
+                    await this.auth.init();
+                }
+
+                // присоединение параметров и выполнение GET запроса
+                async GET(method, params={}) {
+                    let token = await this.auth.getAccessToken();
+                    let options = {
+                        headers: {Authorization: `Bearer ${token}`}
+                    };
+                    let url = this.api + method + "/";
+                    let urlGet = new URL(url);
+                    for (let key in params) {
+                        urlGet.searchParams.set(key, params[key]);
+                    }
+                    let response = await fetch(urlGet, options);
+                    if (response.ok) {
+                        let json = await response.json();
+                        return {
+                            error: false,
+                            result: json,
+                        };
+                    } else {
+                        let json = await response.json();
+                        alert("Ошибка: " + getStringDescErr(json));
+                        return {
+                            error: true,
+                            result: json,
+                        };
+                    }
+                }
+                
+                // присоединение параметров и выполнение GET запроса - пагинация - извлечение всех данных 
+                async GET_LONG(method, params={}) {
+                    let result = [];
+                    let url = this.api + method + "/";
+                    let urlGet = new URL(url);
+                    for (let key in params) {
+                        urlGet.searchParams.set(key, params[key]);
+                    }
+                    while (true) {
+                        let token = await this.auth.getAccessToken();
+                        let options = {
+                            headers: {Authorization: `Bearer ${token}`}
+                        };
+                        let response = await fetch(urlGet, options);
+                        if (response.ok) {
+                            let json = await response.json();
+                            result = result.concat(json.results);
+                            urlGet = json.next;
+                            if (!urlGet) break;
+                        } else {
+                            let json = await response.json();
+                            alert("Ошибка: " + getStringDescErr(json));
+                            return {
+                                error: true,
+                                result: json,
+                            };
+                        }
+                    }
+                    return {
+                        error: false,
+                        result: result,
+                    };
+                }
+
+                async POST(method, data, params={}) {
+                    let token = await this.auth.getAccessToken();
+                    let url = this.api + method + "/";
+                    let urlPost = new URL(url);
+                    for (let key in params) {
+                        urlGet.searchParams.set(key, params[key]);
+                    }
+                    let response = await fetch(urlPost, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        let json = await response.json();
+                        return {
+                            error: false,
+                            result: json,
+                        };
+                    } else {
+                        let json = await response.json();
+                        console.log("Ошибка: " + getStringDescErr(json));
+                        return {
+                            error: true,
+                            result: json,
+                        };
+                    }
+                }
+
+                async PUT(method, data, params={}) {
+                    let token = await this.auth.getAccessToken();
+                    let url = this.api + method + "/";
+                    let urlPut = new URL(url);
+                    for (let key in params) {
+                        urlPut.searchParams.set(key, params[key]);
+                    }
+                    let response = await fetch(urlPut, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (response.ok) {
+                        let json = await response.json();
+                        return {
+                            error: false,
+                            result: json,
+                        };
+                    } else {
+                        let json = await response.json();
+                        alert("Ошибка: " + getStringDescErr(json));
+                        return {
+                            error: true,
+                            result: json,
+                        };
+                    }
+                }
+
+                async DELETE(method, data={}, params={}) {
+                    let token = await this.auth.getAccessToken();
+                    let url = this.api + method + "/";
+                    let urlDelete = new URL(url);
+                    for (let key in params) {
+                        urlDelete.searchParams.set(key, params[key]);
+                    }
+                    let response = await fetch(urlDelete, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        let json = await response.json();
+                        return {
+                            error: false,
+                            result: json,
+                        };
+                    } else {
+                        let json = await response.json();
+                        alert("Ошибка: " + getStringDescErr(json));
+                        return {
+                            error: true,
+                            result: json,
+                        };
+                    }
+                }
+            }
+
+            function getStringDescErr(err) {
+                if (typeof(err) === "string") {
+                    return err;
+                }
+                if (typeof(err) === "number") {
+                    return String(err);
+                }
+                if (typeof(err) === "object" && Array.isArray(err)) {
+                    let errStr = "";
+                    for (let e of err) {
+                        errStr += String(e);
+                    }
+                    return errStr;
+                }
+
+                if (typeof(err) === "object" && !Array.isArray(err)) {
+                    let errStr = "";
+                    for (let key in err) {
+                        errStr += `${key} - ${err[key]}, `;
+                    }
+                    return errStr;
+                }
+            }
+        </script>
+        <script src="//api.bitrix24.com/api/v1/"></script>
+    </head>
+    <body>
+        <div class="container-sm">
+            <h1 class="display-6">Приложение по объединению контактов</h1>
+            <br>
+            <div class="progress-merge-contact">
+                <div class="block-progress-contact">
+                    <label for="progress-contact" class="form-label">Получение данных контактов:</label>
+                    <div class="progress" id="progress-contact">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-companies">
+                    <label for="progress-companies" class="form-label">Получение данных компаний:</label>
+                    <div class="progress" id="progress-companies">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-deals">
+                    <label for="progress-deals" class="form-label">Получение ID сделок:</label>
+                    <div class="progress" id="progress-deals">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-contact-company">
+                    <label for="progress-contact-company" class="form-label">Получение связи контакт-компания:</label>
+                    <div class="progress" id="progress-contact-company">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-contact-deal">
+                    <label for="progress-contact-deal" class="form-label">Получение связи контакт-сделка:</label>
+                    <div class="progress" id="progress-contact-deal">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-duplicates">
+                    <label for="progress-duplicates" class="form-label">Объединение дубликатов контактов (<span id="countDuplicates"></span>):</label>
+                    <div class="progress" id="progress-duplicates">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="mb-3 col-3">
+                <label for="responsibleContactInput" class="form-label">ID владельца контакта</label>
+                <input type="number" class="form-control" id="responsibleContactInput" placeholder="...">
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-3">
+                    <select id="methodMerge" class="form-select" aria-label="Default select example">
+                        <option value="email_contact_name" selected>Имя контакта + email</option>
+                        <option value="email_company">Название компании + email</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" id="btn-merge">Объединить</button>
+                </div>
+            </div>
+
+            <br>
+            <strong>Отчеты: </strong>
+            <div id="reportList">
+                <table class>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    </body>
+</html>

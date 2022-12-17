@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="en">
+    <head>
+    	{% load static %}
+		<script src="//api.bitrix24.com/api/v1/"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container">
+			<div class="alert alert-primary" role="alert"  style="padding-top: 10px;">
+						Авторизация
+			</div>
+			<div class="row g-3 needs-validation" novalidate>
+				<div class="col-md-4">
+					<div style="padding-top: 10px;">
+						<label for="validationServerUsername" class="form-label">Имя пользователя</label>
+						<div class="input-group has-validation">
+							<input type="text" class="form-control" id="validationServerUsername" aria-describedby="inputGroupPrepend1" required>
+							<div class="invalid-feedback">
+								Введите имя пользователя.
+							</div>
+						</div>
+					</div>
+
+					<div style="padding-top: 10px;">
+						<label for="validationServerPassword" class="form-label">Пароль</label>
+						<div class="input-group has-validation">
+							<input type="password" class="form-control" id="validationServerPassword" aria-describedby="inputGroupPrepend2 validationServerPasswordFeedback" required>
+							<div id="validationServerPasswordFeedback" class="invalid-feedback">
+								Введите пароль.
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12" style="padding-top: 20px;">
+						<button class="btn btn-primary" type="submit" id="saveAuth">Сохранить</button>
+					</div>
+					<!-- <button type="submit" class="btn btn-primary"></button> -->
+
+				</div>
+			</div>
+		</div>
+
+		<script>
+			window.onload = async function() {
+				let domen = "{{domain}}";
+				let url_path = "{{url_path}}";
+				let URL__CREATE_DEAL = `${domen}/${url_path}/api/v1/create-deal/`;
+				let URL__UPDATE_DEAL = `${domen}/${url_path}/api/v1/create-deal/`;
+				console.log('URL__CREATE_DEAL = ', URL__CREATE_DEAL);
+				console.log('URL__UPDATE_DEAL = ', URL__UPDATE_DEAL);
+
+				let fieldUsername = document.querySelector("#validationServerUsername");
+				let fieldPassword = document.querySelector("#validationServerPassword");
+				let btnSaveAuth = document.querySelector("#saveAuth");
+
+				btnSaveAuth.addEventListener("click", async (e) => {
+					let username = getUsername();
+					let password = getPassword();
+					console.log("username = ", username);
+					console.log("password = ", password);
+					if (username && password) {
+						await saveAuth(username && password);
+						setTimeout(BX24.installFinish, 5000);
+					}
+				})
+
+				function getUsername() {
+					let username = fieldUsername.value;
+					if (username) {
+						fieldUsername.classList.add("is-valid");
+						fieldUsername.classList.remove("is-invalid");
+					} else {
+						fieldUsername.classList.add("is-invalid");
+						fieldUsername.classList.remove("is-valid");
+					}
+					return username;
+				}
+
+				function getPassword() {
+					let password = fieldPassword.value;
+					if (password) {
+						fieldPassword.classList.add("is-valid");
+						fieldPassword.classList.remove("is-invalid");
+					} else {
+						fieldPassword.classList.add("is-invalid");
+						fieldPassword.classList.remove("is-valid");
+					}
+					return password;
+				}
+
+				async function saveAuth(username, password) {
+					await BX24.appOption.set("username_use_app", username);
+					await BX24.appOption.set("passwd_use_app", password);
+				}
+
+				async function callMethod(method, params = {}) {
+					return new Promise((resolve, reject) => {
+						let callback = result => {
+							if (result.status != 200 || result.error()) {
+								console.log(`${result.error()} (callMethod ${method}: ${JSON.stringify(params)})`);
+								return reject("");
+							}
+							return resolve(result.data());
+						};
+						BX24.callMethod(method, params, callback);
+					});
+				}
+
+				async function addHandler() {
+					await callMethod(
+						'event.bind',
+						{
+							"event": "ONCRMDEALADD",
+							"handler": URL__CREATE_DEAL,
+						},
+						console.log('Обработчик ONCRMDEALADD установлен')
+					)
+					await callMethod(
+						'event.bind',
+						{
+							"event": "ONCRMDEALUPDATE",
+							"handler": URL__UPDATE_DEAL,
+						},
+						console.log('Обработчик ONCRMDEALUPDATE установлен')
+					)
+				}
+
+				async function removeHandler() {
+					let events_old = await callMethod(
+						'event.get',
+						{},
+						console.log('Зарегистрированные обработчики')
+					)
+					if (events_old) {
+						for (let event of events_old) {
+							console.log(event);
+							await callMethod(
+								'event.unbind',
+								{
+									"event": event.event,
+									"handler": event.handler,
+								},
+								console.log(`Обработчик ${event.event} удален`)
+							)
+						}
+					}
+				}
+
+				BX24.init(async function(){
+					await removeHandler();
+					await addHandler();
+					// setTimeout(BX24.installFinish, 5000);
+				});
+			}
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+	</body>
+</html>
