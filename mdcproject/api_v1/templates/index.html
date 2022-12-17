@@ -224,7 +224,9 @@
                         if (!this.access || !this.refresh) {
                             let username = await this.storageGetUsername();
                             let password = await this.storageGetPassword();
-                            let userRegistration = await this.serverRegistrationUser(username, password);
+                            // let userRegistration = await this.serverRegistrationUser(username, password);
+                            console.log(username)
+                            console.log(password)
                             let tokens = await this.serverCreateToken(username, password);
                             let resSaveTokens = await this.storageSaveTokens(tokens.access, tokens.refresh);
                         }
