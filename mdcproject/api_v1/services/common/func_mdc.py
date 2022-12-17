@@ -31,8 +31,7 @@ def merge_contacts(ids, lock, report):
     data_new = []
     try:
         fields = get_fields_contact()
-        # pprint(fields)
-        # return
+
         # список контактов (возвращает словарь {<id_контакта>: <данные>})
         contacts = get_data_contacts(ids)
         if not contacts or fields is None:
@@ -88,8 +87,8 @@ def merge_contacts(ids, lock, report):
         # добавление компаний к контакту
         res_add_companies = add_companies_to_contact(id_contact_last, companies)
 
-        # # удаление дубликатов контактов
-        # del_companies_to_contact(ids, id_contact_last)
+        # удаление дубликатов контактов
+        del_companies_to_contact(ids, id_contact_last)
 
         # добавление сделок к контакту
         res_add_deals = add_deals_to_contact(id_contact_last, deals)
@@ -101,6 +100,13 @@ def merge_contacts(ids, lock, report):
         data_old, data_new = preparing_data_for_report(
             id_contact_last, ids, fields, contacts, comments, activities, tasks
         )
+
+        logger_report_success.info({
+            "id_contact_last": id_contact_last,
+            "ids": ids,
+            "data": data_old,
+            "result_update": data_new
+        })
 
         fields["contact_comments"] = {"title": "Комментарии"}
         fields["contact_activities"] = {"title": "Связанные дела"}
@@ -115,12 +121,7 @@ def merge_contacts(ids, lock, report):
         # report.add_fields(fields)
         # report.add(contacts, id_contact_last, data, companies, deals_obj, coments, activities, tasks)
         lock.release()
-        logger_report_success.info({
-            "id_contact_last": id_contact_last,
-            "ids": ids,
-            "data": data_old,
-            "result_update": data_new
-        })
+
     except Exception as err:
         logger_report_success.info({
             "id_contact_last": id_contact_last,
