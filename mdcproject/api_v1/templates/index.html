@@ -355,7 +355,7 @@
                         this.renderProgressBar(response.result);
                     }
                     this.getFilenames();
-                    setTimeout(this.ping, 1000);
+                    setTimeout(serverPing, 1000);
                 }
 
                 renderProgressBar(res) {
@@ -819,6 +819,9 @@
                 BX24.init(async function(){
                     app = new App();
                     app.init();
+                    function serverPing() {
+                        app.ping();
+                    }
                 })
             }
         </script>
