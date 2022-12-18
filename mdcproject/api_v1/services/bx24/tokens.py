@@ -42,6 +42,8 @@ def update_secrets_bx24(auth_token, expires_in, refresh_token):
 
 """ Получение значения секрета BX24 по ключу """
 def get_secret_bx24(key):
+    with open(filename_secrets_bx24, "a") as secrets_file:
+        pass
     with open(filename_secrets_bx24, "r") as secrets_file:
         try:
             data = json.load(secrets_file)
@@ -52,6 +54,8 @@ def get_secret_bx24(key):
 
 """ Получение всех секретов BX24 """
 def get_secrets_all_bx24():
+    with open(filename_secrets_bx24, "a") as secrets_file:
+        pass
     with open(filename_secrets_bx24, "r") as secrets_file:
         try:
             data = json.load(secrets_file)
