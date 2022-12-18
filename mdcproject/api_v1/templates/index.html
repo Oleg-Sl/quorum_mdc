@@ -293,10 +293,10 @@
                     this.pathContactMerge = "merge-contacts";
                     this.pathReportFilename = "report";
                     this.pathReportDownload = "report-download";
-                    this.urlContactPing = `${domen}/${url_path}/api/v1/status-merge-contacts/`;
-                    this.urlContactMerge = `${domen}/${url_path}/api/v1/merge-contacts/`;
-                    this.urlReportFilename = `${domen}/${url_path}/api/v1/report/`;
-                    this.urlReportDownload = `${domen}/${url_path}/api/v1/report-download/`;
+                    this.urlContactPing = `${this.domen}/${this.url_path}/api/v1/status-merge-contacts/`;
+                    this.urlContactMerge = `${this.domen}/${this.url_path}/api/v1/merge-contacts/`;
+                    this.urlReportFilename = `${this.domen}/${this.url_path}/api/v1/report/`;
+                    this.urlReportDownload = `${this.domen}/${this.url_path}/api/v1/report-download/`;
 
                     this.btnMerge = document.querySelector("#btn-merge");
                     this.progressContact = document.querySelector("#progress-contact .progress-bar");
@@ -317,7 +317,7 @@
                     console.log('urlReportFilename = ', this.urlReportFilename);
                     console.log('urlReportDownload = ', this.urlReportDownload);
 
-                    this.request = new Request(domen, url_path);
+                    this.request = new Request(this.domen, this.url_path);
                     await this.request.init();
                     await this.initHandler();
                     thistimerId = setInterval(this.ping, 1000);
