@@ -309,6 +309,7 @@
                     this.responsibleContactInput = document.querySelector("#responsibleContactInput");
                     this.methodMerge = document.querySelector("#methodMerge");
                     this.reportList = document.querySelector("#reportList tbody");
+                    this.request = new Request(this.domen, this.url_path);
 
                 }
                 async init() {
@@ -316,8 +317,8 @@
                     console.log('urlContactMerge = ', this.urlContactMerge);
                     console.log('urlReportFilename = ', this.urlReportFilename);
                     console.log('urlReportDownload = ', this.urlReportDownload);
+                    console.log('request = ', this.request);
 
-                    this.request = new Request(this.domen, this.url_path);
                     await this.request.init();
                     await this.initHandler();
                     this.timerId = setInterval(this.ping, 1000);
