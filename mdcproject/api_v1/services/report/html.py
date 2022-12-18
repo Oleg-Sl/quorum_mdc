@@ -34,7 +34,7 @@ class Report:
                         <style>
                             table {border-collapse: collapse;}
                             th {
-                                border: 2px solid #dee2e6;
+                                border: 2px solid #a7a8a9;
                                 padding: 6px;
                                 text-align: "center";
                                 font-size: 14px;
@@ -45,7 +45,7 @@ class Report:
                                 white-space: nowrap;
                             }
                             td {
-                                border: 2px solid #dee2e6;
+                                border: 2px solid #a7a8a9;
                                 font-size: 12px;
                                 font-weight: 400;
                                 font-family: sans-serif;
@@ -54,14 +54,16 @@ class Report:
                                 padding: 2px 5px;
                                 max-width: 300px;
                                 overflow: auto;
+                                vertical-align: top;
                             }
                             .result td {
                                 background-color: #cfe2ff;
                                 border-bottom: 4px solid #74b0ec;
+                                vertical-align: top;
                             }
                             .table_cell {
-                                max-width: 75px;
-                                overflow: auto;
+                                overflow-y: auto;
+                                max-height: 125px;
                             }
                         </style>
                         <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous"> -->
