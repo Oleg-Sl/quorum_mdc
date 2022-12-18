@@ -7,43 +7,43 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
         {% load static %}
         <script src="//api.bitrix24.com/api/v1/"></script>
-        <script>
+        <!-- <script>
             BX24.init(async function(){
 
             window.onload = async function() {
-                let domen = "{{domain}}";
-                let url_path = "{{url_path}}";
+                // let domen = "{{domain}}";
+                // let url_path = "{{url_path}}";
 
-                let pathContactPing = "status-merge-contacts";
-                let pathContactMerge = "merge-contacts";
-                let pathReportFilename = "report";
-                let pathReportDownload = "report-download";
+                // let pathContactPing = "status-merge-contacts";
+                // let pathContactMerge = "merge-contacts";
+                // let pathReportFilename = "report";
+                // let pathReportDownload = "report-download";
 
-                let urlContactPing = `${domen}/${url_path}/api/v1/status-merge-contacts/`;
-                let urlContactMerge = `${domen}/${url_path}/api/v1/merge-contacts/`;
-                let urlReportFilename = `${domen}/${url_path}/api/v1/report/`;
-                let urlReportDownload = `${domen}/${url_path}/api/v1/report-download/`;
-                console.log('urlContactPing = ', urlContactPing);
-                console.log('urlContactMerge = ', urlContactMerge);
-                console.log('urlReportFilename = ', urlReportFilename);
-                console.log('urlReportDownload = ', urlReportDownload);
+                // let urlContactPing = `${domen}/${url_path}/api/v1/status-merge-contacts/`;
+                // let urlContactMerge = `${domen}/${url_path}/api/v1/merge-contacts/`;
+                // let urlReportFilename = `${domen}/${url_path}/api/v1/report/`;
+                // let urlReportDownload = `${domen}/${url_path}/api/v1/report-download/`;
+                // console.log('urlContactPing = ', urlContactPing);
+                // console.log('urlContactMerge = ', urlContactMerge);
+                // console.log('urlReportFilename = ', urlReportFilename);
+                // console.log('urlReportDownload = ', urlReportDownload);
 
-                let btnMerge = document.querySelector("#btn-merge");
-                let progressContact = document.querySelector("#progress-contact .progress-bar");
-                let progressCompanies = document.querySelector("#progress-companies .progress-bar");
-                let progressDeals = document.querySelector("#progress-deals .progress-bar");
-                let progressContactCompany = document.querySelector("#progress-contact-company .progress-bar");
-                let progressContactDeal = document.querySelector("#progress-contact-deal .progress-bar");
-                let progressDuplicates = document.querySelector("#progress-duplicates .progress-bar");
-                let countDuplicates = document.querySelector("#countDuplicates");
-                let responsibleContactInput = document.querySelector("#responsibleContactInput");
-                let methodMerge = document.querySelector("#methodMerge");
-                let reportList = document.querySelector("#reportList tbody");
+                // let btnMerge = document.querySelector("#btn-merge");
+                // let progressContact = document.querySelector("#progress-contact .progress-bar");
+                // let progressCompanies = document.querySelector("#progress-companies .progress-bar");
+                // let progressDeals = document.querySelector("#progress-deals .progress-bar");
+                // let progressContactCompany = document.querySelector("#progress-contact-company .progress-bar");
+                // let progressContactDeal = document.querySelector("#progress-contact-deal .progress-bar");
+                // let progressDuplicates = document.querySelector("#progress-duplicates .progress-bar");
+                // let countDuplicates = document.querySelector("#countDuplicates");
+                // let responsibleContactInput = document.querySelector("#responsibleContactInput");
+                // let methodMerge = document.querySelector("#methodMerge");
+                // let reportList = document.querySelector("#reportList tbody");
 
-                this.request = new Request(domen, url_path);
-                await this.request.init();
+                // this.request = new Request(domen, url_path);
+                // await this.request.init();
 
-                let timerId = setInterval(ping, 1000);
+                // let timerId = setInterval(ping, 1000);
 
                 async function ping() {
                     let response = await this.request.GET(pathContactPing);
@@ -210,9 +210,240 @@
                 getFilenames();
             }
             });
-        </script>
+        </script> -->
+
+    </head>
+    <body>
+        <div class="container-sm">
+            <h1 class="display-6">Приложение по объединению контактов</h1>
+            <br>
+            <div class="progress-merge-contact">
+                <div class="block-progress-contact">
+                    <label for="progress-contact" class="form-label">Получение данных контактов:</label>
+                    <div class="progress" id="progress-contact">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-companies">
+                    <label for="progress-companies" class="form-label">Получение данных компаний:</label>
+                    <div class="progress" id="progress-companies">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-deals">
+                    <label for="progress-deals" class="form-label">Получение ID сделок:</label>
+                    <div class="progress" id="progress-deals">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-contact-company">
+                    <label for="progress-contact-company" class="form-label">Получение связи контакт-компания:</label>
+                    <div class="progress" id="progress-contact-company">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-contact-deal">
+                    <label for="progress-contact-deal" class="form-label">Получение связи контакт-сделка:</label>
+                    <div class="progress" id="progress-contact-deal">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="block-progress-duplicates">
+                    <label for="progress-duplicates" class="form-label">Объединение дубликатов контактов (<span id="countDuplicates"></span>):</label>
+                    <div class="progress" id="progress-duplicates">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="mb-3 col-3">
+                <label for="responsibleContactInput" class="form-label">ID владельца контакта</label>
+                <input type="number" class="form-control" id="responsibleContactInput" placeholder="...">
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-3">
+                    <select id="methodMerge" class="form-select" aria-label="Default select example">
+                        <option value="email_contact_name" selected>Имя контакта + email</option>
+                        <option value="email_company">Название компании + email</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" id="btn-merge">Объединить</button>
+                </div>
+            </div>
+
+            <br>
+            <strong>Отчеты: </strong>
+            <div id="reportList">
+                <table class>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <script>
+            class App {
+                constructor() {
+                    this.domen = "{{domain}}";
+                    this.url_path = "{{url_path}}";
+                    this.pathContactPing = "status-merge-contacts";
+                    this.pathContactMerge = "merge-contacts";
+                    this.pathReportFilename = "report";
+                    this.pathReportDownload = "report-download";
+                    this.urlContactPing = `${domen}/${url_path}/api/v1/status-merge-contacts/`;
+                    this.urlContactMerge = `${domen}/${url_path}/api/v1/merge-contacts/`;
+                    this.urlReportFilename = `${domen}/${url_path}/api/v1/report/`;
+                    this.urlReportDownload = `${domen}/${url_path}/api/v1/report-download/`;
+
+                    this.btnMerge = document.querySelector("#btn-merge");
+                    this.progressContact = document.querySelector("#progress-contact .progress-bar");
+                    this.progressCompanies = document.querySelector("#progress-companies .progress-bar");
+                    this.progressDeals = document.querySelector("#progress-deals .progress-bar");
+                    this.progressContactCompany = document.querySelector("#progress-contact-company .progress-bar");
+                    this.progressContactDeal = document.querySelector("#progress-contact-deal .progress-bar");
+                    this.progressDuplicates = document.querySelector("#progress-duplicates .progress-bar");
+                    this.countDuplicates = document.querySelector("#countDuplicates");
+                    this.responsibleContactInput = document.querySelector("#responsibleContactInput");
+                    this.methodMerge = document.querySelector("#methodMerge");
+                    this.reportList = document.querySelector("#reportList tbody");
+
+                }
+                async init() {
+                    console.log('urlContactPing = ', this.urlContactPing);
+                    console.log('urlContactMerge = ', this.urlContactMerge);
+                    console.log('urlReportFilename = ', this.urlReportFilename);
+                    console.log('urlReportDownload = ', this.urlReportDownload);
+
+                    this.request = new Request(domen, url_path);
+                    await this.request.init();
+                    await this.initHandler();
+                    thistimerId = setInterval(this.ping, 1000);
+                }
+
+                async initHandler() {
+                    this.btnMerge.addEventListener("click", async (e) => {
+                        let response = await this.request.POST(
+                            pathContactMerge,
+                            {
+                                "method": this.getMethodMerge(),
+                                "assigned_id": this.responsibleContactInput.value
+                            }
+                        );
+                        if (!response.error) {
+                            this.setZeroProgressbar();
+                        }
+                    })
+
+                    this.reportList.addEventListener('click', async (e)=> {
+                        if (e.target.tagName == 'BUTTON') {
+                            let tr = e.target.closest('tr');
+                            let filename = tr.dataset.filename;
+                            this.deleteFile(filename);
+                        }
+                    });
+                }
+
+                async ping() {
+                    let response = await this.request.GET(pathContactPing);
+                    if (!response.error) {
+                        this.renderProgressBar(response.result);
+                    }
+                    this.getFilenames();
+
+                }
+
+                renderProgressBar(res) {
+                    console.log(res);
+                    if (res.status) {
+                        this.btnMerge.disabled = true;
+                        if (res.contacts) {
+                            let percentContacts = this.getPercent(res.contacts.start, res.contacts.actual);
+                            this.progressContact.style.width = `${percentContacts}%`;
+                            console.log("percentContacts = ", percentContacts);
+                        }
+                        if (res.companies) {
+                            let percentCompanies = this.getPercent(res.companies.start, res.companies.actual);
+                            this.progressCompanies.style.width = `${percentCompanies}%`;
+                            console.log("percentCompanies = ", percentCompanies);
+                        }
+                        if (res.deals) {
+                            let percentDeals = this.getPercent(res.deals.start, res.deals.actual);
+                            this.progressDeals.style.width = `${percentDeals}%`;
+                            console.log("percentDeals = ", percentDeals);
+                        }
+                        if (res.contact_company) {
+                            let percentContactCompany = this.getPercent(res.contact_company.start, res.contact_company.actual);
+                            this.progressContactCompany.style.width = `${percentContactCompany}%`;
+                            console.log("percentContactCompany = ", percentContactCompany);
+                        }
+                        if (res.contact_deal) {
+                            let percentContactDeal = this.getPercent(res.contact_deal.start, res.contact_deal.actual);
+                            this.progressContactDeal.style.width = `${percentContactDeal}%`;
+                            console.log("percentContactDeal = ", percentContactDeal);
+                        }
+                        if (res.duplicates) {
+                            countDuplicates.innerHTML = res.duplicates.start;
+                            let percentDuplicates = this.getPercent(res.duplicates.start, res.duplicates.actual);
+                            this.progressDuplicates.style.width = `${percentDuplicates}%`;
+                            console.log("percentDuplicates = ", percentDuplicates);
+                        }
+                    } else {
+                        this.btnMerge.disabled = false;
+                    }
+                }
+
+                getPercent(total, actual_count) {
+                    if (total) {
+                        return 100 * (total - actual_count) / total;
+                    }
+                    return 0;
+                }
+
+                setZeroProgressbar() {
+                    this.progressContact.style.width = `0%`;
+                    this.progressCompanies.style.width = `0%`;
+                    this.progressDeals.style.width = `0%`;
+                    this.progressContactCompany.style.width = `0%`;
+                    this.progressContactDeal.style.width = `0%`;
+                    this.progressDuplicates.style.width = `0%`;
+                }
+
+                getMethodMerge() {
+                    return this.methodMerge.value;
+                }
+
+                async getFilenames() {
+                    let response = await this.request.GET(this.pathReportFilename);
+                    if (!response.error) {
+                        this.renderFilenames(response.result);
+                    }
+                }
+
+                renderFilenames(filenames) {
+                    html = '';
+                    for (filename of filenames) {
+                        html += `
+                        <tr data-filename="${filename}">
+                            <td><a href="${this.urlReportDownload}?file=${filename}">${filename}</a> <br></td>
+                            <td class="remove" title="Удалить файл" data-filename="${filename}"><button type="button" class="btn-close" aria-label="Close"></button></td>
+                        </tr>
+                        `;
+                    }
+                    this.reportList.innerHTML = html;
+                }
+
+                async deleteFile(filename) {
+                    let data = {};
+                    let params = {
+                        file: filename,
+                    };
+                    let response = await this.request.DELETE(this.pathReportDownload, data, params);
+                }
+            }
+
             class Auth {
                     constructor(DOMAIN, PATH) {
                         this.domain = `${DOMAIN}/${PATH}`;
@@ -580,80 +811,14 @@
                     return errStr;
                 }
             }
+
+            window.onload = async function() {
+                BX24.init(async function(){
+                    app = new App();
+                    app.init();
+                })
+            }
         </script>
-        <script src="//api.bitrix24.com/api/v1/"></script>
-    </head>
-    <body>
-        <div class="container-sm">
-            <h1 class="display-6">Приложение по объединению контактов</h1>
-            <br>
-            <div class="progress-merge-contact">
-                <div class="block-progress-contact">
-                    <label for="progress-contact" class="form-label">Получение данных контактов:</label>
-                    <div class="progress" id="progress-contact">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="block-progress-companies">
-                    <label for="progress-companies" class="form-label">Получение данных компаний:</label>
-                    <div class="progress" id="progress-companies">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="block-progress-deals">
-                    <label for="progress-deals" class="form-label">Получение ID сделок:</label>
-                    <div class="progress" id="progress-deals">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="block-progress-contact-company">
-                    <label for="progress-contact-company" class="form-label">Получение связи контакт-компания:</label>
-                    <div class="progress" id="progress-contact-company">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="block-progress-contact-deal">
-                    <label for="progress-contact-deal" class="form-label">Получение связи контакт-сделка:</label>
-                    <div class="progress" id="progress-contact-deal">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="block-progress-duplicates">
-                    <label for="progress-duplicates" class="form-label">Объединение дубликатов контактов (<span id="countDuplicates"></span>):</label>
-                    <div class="progress" id="progress-duplicates">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-            <br>
-            <div class="mb-3 col-3">
-                <label for="responsibleContactInput" class="form-label">ID владельца контакта</label>
-                <input type="number" class="form-control" id="responsibleContactInput" placeholder="...">
-            </div>
-            <br>
-            <div class="row">
-                <div class="col-3">
-                    <select id="methodMerge" class="form-select" aria-label="Default select example">
-                        <option value="email_contact_name" selected>Имя контакта + email</option>
-                        <option value="email_company">Название компании + email</option>
-                    </select>
-                </div>
-                <div class="col">
-                    <button type="button" class="btn btn-primary" id="btn-merge">Объединить</button>
-                </div>
-            </div>
-
-            <br>
-            <strong>Отчеты: </strong>
-            <div id="reportList">
-                <table class>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
     </body>
 </html>
