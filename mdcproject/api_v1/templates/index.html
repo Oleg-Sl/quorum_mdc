@@ -320,13 +320,13 @@
                     this.request = new Request(this.domen, this.url_path);
                     await this.request.init();
                     await this.initHandler();
-                    thistimerId = setInterval(this.ping, 1000);
+                    this.timerId = setInterval(this.ping, 1000);
                 }
 
                 async initHandler() {
                     this.btnMerge.addEventListener("click", async (e) => {
                         let response = await this.request.POST(
-                            pathContactMerge,
+                            this.pathContactMerge,
                             {
                                 "method": this.getMethodMerge(),
                                 "assigned_id": this.responsibleContactInput.value
@@ -347,7 +347,7 @@
                 }
 
                 async ping() {
-                    let response = await this.request.GET(pathContactPing);
+                    let response = await this.request.GET(this.pathContactPing);
                     if (!response.error) {
                         this.renderProgressBar(response.result);
                     }
@@ -385,7 +385,7 @@
                             console.log("percentContactDeal = ", percentContactDeal);
                         }
                         if (res.duplicates) {
-                            countDuplicates.innerHTML = res.duplicates.start;
+                            this.countDuplicates.innerHTML = res.duplicates.start;
                             let percentDuplicates = this.getPercent(res.duplicates.start, res.duplicates.actual);
                             this.progressDuplicates.style.width = `${percentDuplicates}%`;
                             console.log("percentDuplicates = ", percentDuplicates);
