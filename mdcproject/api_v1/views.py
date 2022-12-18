@@ -163,8 +163,8 @@ class MergeContactsViewSet(views.APIView):
         if assigned_id:
             filters["ASSIGNED_BY_ID"] = assigned_id
 
-        thread_merge = Thread(target=tasks.merge_contacts, args=[method, filters, ])
-        thread_merge.start()
+        THREAD_MERGE = Thread(target=tasks.merge_contacts, args=[method, filters, ])
+        THREAD_MERGE.start()
 
         return Response("Ok", status=status.HTTP_200_OK)
 
