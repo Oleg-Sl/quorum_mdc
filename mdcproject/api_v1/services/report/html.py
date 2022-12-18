@@ -59,6 +59,10 @@ class Report:
                                 background-color: #cfe2ff;
                                 border-bottom: 4px solid #74b0ec;
                             }
+                            .table_cell {
+                                max-width: 75px;
+                                overflow: auto;
+                            }
                         </style>
                         <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous"> -->
                         <title>Отчет</title>
@@ -117,7 +121,9 @@ class Report:
             id_contact = data.get("ID", "")
             html = f'''
                 <td>
-                    <a href="{self.api_contact.format(domain=self.domain, id_contact=id_contact)}">{id_contact}</a>
+                    <div class="table_cell">
+                        <a href="{self.api_contact.format(domain=self.domain, id_contact=id_contact)}">{id_contact}</a>
+                    </div>
                 </td>\n
             '''
 
@@ -127,17 +133,17 @@ class Report:
                     continue
                 elif field == 'contact_companies':
                     links = [f'<a href="{self.api_company.format(domain=self.domain, id_company=id_)}">{id_}</a>' for id_ in value if id_]
-                    html += f'<td>{",<br>".join(links)}</td>\n'
+                    html += f'<td><div class="table_cell">{",<br>".join(links)}</div></td>\n'
                 elif field == 'contact_deals':
                     links = [f'<a href="{self.api_deal.format(domain=self.domain, id_deal=id_)}">{id_}</a>' for id_ in value if id_]
-                    html += f'<td>{",<br>".join(links)}</td>\n'
+                    html += f'<td><div class="table_cell">{",<br>".join(links)}</div></td>\n'
                 elif field == 'contact_tasks':
                     links = [f'<a href="{self.api_task.format(domain=self.domain, id_task=id_)}">{id_}</a>' for id_ in value if id_]
-                    html += f'<td>{",<br>".join(links)}</td>\n'
+                    html += f'<td><div class="table_cell">{",<br>".join(links)}</div></td>\n'
                 elif isinstance(value, list):
-                    html += f'<td>{",<br>".join(value)}</td>\n'
+                    html += f'<td><div class="table_cell">{",<br>".join(value)}</div></td>\n'
                 else:
-                    html += f'<td>{value or "&ndash;"}</td>\n'
+                    html += f'<td><div class="table_cell">{value or "&ndash;"}</div></td>\n'
             return html
         except Exception as err:
             print("err = ", err)
