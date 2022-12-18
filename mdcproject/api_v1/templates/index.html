@@ -6,8 +6,8 @@
         <title>Title</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
         {% load static %}
-        <style>
-            linkFile {
+        <style type="text/css">
+            .linkFile {
                 color: #0d6efd;
                 text-decoration: underline;
                 cursor: pointer;
@@ -353,7 +353,7 @@
                         if (e.target.tagName == 'SPAN' && e.target.classList.contains("linkFile")) {
                             let tr = e.target.closest('tr');
                             let filename = tr.dataset.filename;
-                            this.request.GET(this.pathReportDownload, {file: filename});
+                            this.request.DOWNLOAD(this.pathReportDownload, {file: filename});
                             // this.deleteFile(filename);
                         }
                         if (e.target.tagName == 'BUTTON' && e.target.classList.contains("linkRemoveFile")) {
@@ -448,6 +448,7 @@
 
                 renderFilenames(filenames) {
                     let html = '';
+                    // 
                     for (let filename of filenames) {
                         // <td><span linkFile href="${urlReportDownload}?file=${filename}">${filename}</a> <br></td>
                         html += `
@@ -654,6 +655,34 @@
 
                 async init() {
                     await this.auth.init();
+                }
+
+                async DOWNLOAD(method, params={}) {
+                    let token = await this.auth.getAccessToken();
+                    let options = {
+                        headers: {Authorization: `Bearer ${token}`}
+                    };
+                    let url = this.api + method + "/";
+                    let urlGet = new URL(url);
+                    for (let key in params) {
+                        urlGet.searchParams.set(key, params[key]);
+                    }
+                    let response = await fetch(urlGet, options);
+                    if (response.ok) {
+                        let blob = await response.blob();
+                        download(blob);
+                        return {
+                            error: false,
+                            result: blob
+                        };
+                    } else {
+                        let json = await response.json();
+                        alert("Ошибка: " + getStringDescErr(json));
+                        return {
+                            error: true,
+                            result: json,
+                        };
+                    }
                 }
 
                 // присоединение параметров и выполнение GET запроса
