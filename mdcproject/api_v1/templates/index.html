@@ -427,7 +427,7 @@
 
                 renderFilenames(filenames) {
                     let html = '';
-                    for (filename of filenames) {
+                    for (let filename of filenames) {
                         html += `
                         <tr data-filename="${filename}">
                             <td><a href="${this.urlReportDownload}?file=${filename}">${filename}</a> <br></td>
