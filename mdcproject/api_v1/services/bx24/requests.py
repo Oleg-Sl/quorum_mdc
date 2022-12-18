@@ -96,6 +96,7 @@ class Bitrix24:
     def call(self, method, data):
         if not self.domain or self.auth_token:
             self.init_tokens()
+        r = {}
         try:
             url = self.api_url.format(domain=self.domain, method=method)
             params = dict(auth=self.auth_token)
@@ -128,7 +129,7 @@ class Bitrix24:
                 "error": err,
                 "method": method,
                 "data": data,
-                "text": r.text
+                "text": r
             })
             result = dict(error=f'Timeout waiting expired [{str(self.timeout)} sec]')
         except exceptions.ConnectionError as err:
@@ -137,7 +138,7 @@ class Bitrix24:
                 "error": err,
                 "method": method,
                 "data": data,
-                "text": r.text
+                "text": r
             })
             result = dict(error=f'Max retries exceeded [{str(adapters.DEFAULT_RETRIES)}]')
         except Exception as err:
@@ -146,7 +147,7 @@ class Bitrix24:
                 "error": err,
                 "method": method,
                 "data": data,
-                "text": r.text
+                "text": r
             })
 
         if 'error' in result and result['error'] in ('NO_AUTH_FOUND', 'expired_token'):
