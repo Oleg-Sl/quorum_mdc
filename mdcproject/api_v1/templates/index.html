@@ -355,6 +355,12 @@
                         this.renderProgressBar(response.result);
                     }
                     this.getFilenames();
+
+                    function func() {
+                        this.ping();
+                    }
+
+                    let serverPing = func.bind(this);
                     setTimeout(serverPing, 1000);
                 }
 
