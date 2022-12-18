@@ -48,6 +48,7 @@ class Bitrix24:
 
     def init_tokens(self):
         tokens = get_secrets_all_bx24()
+        print("tokens = ", tokens)
         logger_request_success.info(tokens)
         self.domain = tokens.get("domain", None)
         self.auth_token = tokens.get("auth_token", None)
@@ -103,7 +104,10 @@ class Bitrix24:
             headers = {
                 'Content-Type': 'application/json',
             }
+            # print("url = ", url)
+            # print("params = ", params)
             r = post(url, data=json.dumps(data), params=params, headers=headers, timeout=self.timeout)
+            # print("r = ", r)
             logger_request_success.info({
                 "func": "call",
                 "url": url,
