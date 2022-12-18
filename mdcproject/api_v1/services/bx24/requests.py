@@ -48,7 +48,7 @@ class Bitrix24:
 
     def init_tokens(self):
         tokens = get_secrets_all_bx24()
-        print("tokens = ", tokens)
+        # print("tokens = ", tokens)
         logger_request_success.info(tokens)
         self.domain = tokens.get("domain", None)
         self.auth_token = tokens.get("auth_token", None)
