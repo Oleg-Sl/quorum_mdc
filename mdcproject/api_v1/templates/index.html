@@ -321,7 +321,8 @@
 
                     await this.request.init();
                     await this.initHandler();
-                    this.timerId = setInterval(this.ping, 1500);
+                    // this.timerId = setInterval(this.ping, 1500);
+                    this.ping();
                 }
 
                 async initHandler() {
@@ -347,14 +348,14 @@
                     });
                 }
 
-                ping() {
+                async ping() {
                     console.log('request = ', this.request);
-                    let response = this.request.GET(this.pathContactPing);
+                    let response = await this.request.GET(this.pathContactPing);
                     if (!response.error) {
                         this.renderProgressBar(response.result);
                     }
                     this.getFilenames();
-
+                    setTimeout(this.ping, 1000);
                 }
 
                 renderProgressBar(res) {
