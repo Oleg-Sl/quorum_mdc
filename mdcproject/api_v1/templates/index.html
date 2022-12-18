@@ -364,6 +364,8 @@
                     });
                 }
 
+ 
+
                 async ping() {
                     let response = await this.request.GET(this.pathContactPing);
                     if (!response.error) {
@@ -657,6 +659,13 @@
                     await this.auth.init();
                 }
 
+                saveFile(blob){
+                    let link = document.createElement("a");
+                    link.setAttribute("href", URL.createObjectURL(blob));
+                    link.setAttribute("download", `${Date.now()}`);
+                    link.click();
+                }
+
                 async DOWNLOAD(method, params={}) {
                     let token = await this.auth.getAccessToken();
                     let options = {
@@ -670,7 +679,7 @@
                     let response = await fetch(urlGet, options);
                     if (response.ok) {
                         let blob = await response.blob();
-                        download(blob);
+                        this.saveFile(blob);
                         return {
                             error: false,
                             result: blob
