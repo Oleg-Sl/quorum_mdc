@@ -6,6 +6,16 @@
         <title>Title</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
         {% load static %}
+        <style>
+            linkFile {
+                color: #0d6efd;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            linkFile:hover {
+                color: #0a58ca;
+            }
+        </style>
         <script src="//api.bitrix24.com/api/v1/"></script>
         <!-- <script>
             BX24.init(async function(){
@@ -310,8 +320,8 @@
                     this.methodMerge = document.querySelector("#methodMerge");
                     this.reportList = document.querySelector("#reportList tbody");
                     this.request = new Request(this.domen, this.url_path);
-
                 }
+
                 async init() {
                     console.log('urlContactPing = ', this.urlContactPing);
                     console.log('urlContactMerge = ', this.urlContactMerge);
@@ -340,7 +350,13 @@
                     })
 
                     this.reportList.addEventListener('click', async (e)=> {
-                        if (e.target.tagName == 'BUTTON') {
+                        if (e.target.tagName == 'SPAN' && e.target.classList.contains("linkFile")) {
+                            let tr = e.target.closest('tr');
+                            let filename = tr.dataset.filename;
+                            this.request.GET(this.pathReportDownload, {file: filename});
+                            // this.deleteFile(filename);
+                        }
+                        if (e.target.tagName == 'BUTTON' && e.target.classList.contains("linkRemoveFile")) {
                             let tr = e.target.closest('tr');
                             let filename = tr.dataset.filename;
                             this.deleteFile(filename);
@@ -349,7 +365,6 @@
                 }
 
                 async ping() {
-                    console.log('request = ', this.request);
                     let response = await this.request.GET(this.pathContactPing);
                     if (!response.error) {
                         this.renderProgressBar(response.result);
@@ -434,10 +449,11 @@
                 renderFilenames(filenames) {
                     let html = '';
                     for (let filename of filenames) {
+                        // <td><span linkFile href="${urlReportDownload}?file=${filename}">${filename}</a> <br></td>
                         html += `
                         <tr data-filename="${filename}">
-                            <td><a href="${this.urlReportDownload}?file=${filename}">${filename}</a> <br></td>
-                            <td class="remove" title="Удалить файл" data-filename="${filename}"><button type="button" class="btn-close" aria-label="Close"></button></td>
+                            <td><span class="linkFile">${filename}</a> <br></td>
+                            <td class="remove" title="Удалить файл" data-filename="${filename}"><button type="button" class="btn-close linkRemoveFile" aria-label="Close"></button></td>
                         </tr>
                         `;
                     }
