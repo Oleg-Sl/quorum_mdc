@@ -13,13 +13,19 @@ from .tokens import update_secrets_bx24, get_secrets_all_bx24
 from ..parameters import BX24__COUNT_METHODS_IN_BATH, BX24__COUNT_RECORDS_IN_METHODS
 
 
-# логгер входные данные событий от Битрикс
-logger_req = logging.getLogger('bx24_requests')
-logger_req.setLevel(logging.INFO)
-fh_req = logging.handlers.TimedRotatingFileHandler('bx24_requests.log', when='D', interval=1)
-formatter_req = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
-fh_req.setFormatter(formatter_req)
-logger_req.addHandler(fh_req)
+logger_request_success = logging.getLogger('request_success')
+logger_request_success.setLevel(logging.INFO)
+fh_request_success = logging.handlers.TimedRotatingFileHandler('./logs/request_success/success.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+formatter_request_success = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
+fh_request_success.setFormatter(formatter_request_success)
+logger_request_success.addHandler(fh_request_success)
+
+logger_request_errors = logging.getLogger('request_errors')
+logger_request_errors.setLevel(logging.INFO)
+fh_request_errors = logging.handlers.TimedRotatingFileHandler('./logs/request_errors/errors.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+formatter_request_errors = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
+fh_request_errors.setFormatter(formatter_request_errors)
+logger_request_errors.addHandler(fh_request_errors)
 
 
 adapters.DEFAULT_RETRIES = 10
@@ -42,7 +48,7 @@ class Bitrix24:
 
     def init_tokens(self):
         tokens = get_secrets_all_bx24()
-        logger_req.info(tokens)
+        logger_request_success.info(tokens)
         self.domain = tokens.get("domain", None)
         self.auth_token = tokens.get("auth_token", None)
         self.refresh_token = tokens.get("refresh_token", None)
@@ -57,7 +63,7 @@ class Bitrix24:
                 self.oauth_url,
                 params={'grant_type': 'refresh_token', 'client_id': self.client_id, 'client_secret': self.client_secret,
                         'refresh_token': self.refresh_token})
-            logger_req.info({
+            logger_request_success.info({
                 "func": "refresh_tokens",
                 "url": self.oauth_url,
                 "params": {'grant_type': 'refresh_token', 'client_id': self.client_id, 'client_secret': self.client_secret,
@@ -72,14 +78,24 @@ class Bitrix24:
             self.expires_in = result['expires_in']
             update_secrets_bx24(self.auth_token, self.expires_in, self.refresh_token)
             return True
-        except (ValueError, KeyError):
+        except (ValueError, KeyError) as err:
+            logger_request_errors.error({
+                "func": "refresh_tokens",
+                "error": err,
+                "text": r.text
+            })
             result = dict(error='Error on decode oauth response [%s]' % r.text)
             return result
+        except Exception as err:
+            logger_request_errors.error({
+                "func": "refresh_tokens",
+                "error": err,
+                "text": r.text
+            })
 
     def call(self, method, data):
         if not self.domain or self.auth_token:
             self.init_tokens()
-
         try:
             url = self.api_url.format(domain=self.domain, method=method)
             params = dict(auth=self.auth_token)
@@ -87,7 +103,7 @@ class Bitrix24:
                 'Content-Type': 'application/json',
             }
             r = post(url, data=json.dumps(data), params=params, headers=headers, timeout=self.timeout)
-            logger_req.info({
+            logger_request_success.info({
                 "func": "call",
                 "url": url,
                 "data": data,
@@ -97,12 +113,41 @@ class Bitrix24:
                 "result": r.text
             })
             result = json.loads(r.text)
-        except ValueError:
+        except ValueError as err:
+            logger_request_errors.error({
+                "func": "call",
+                "error": err,
+                "method": method,
+                "data": data,
+                "text": r.text
+            })
             result = dict(error=f'Error on decode api response [{r.text}]')
-        except exceptions.ReadTimeout:
+        except exceptions.ReadTimeout as err:
+            logger_request_errors.error({
+                "func": "call",
+                "error": err,
+                "method": method,
+                "data": data,
+                "text": r.text
+            })
             result = dict(error=f'Timeout waiting expired [{str(self.timeout)} sec]')
-        except exceptions.ConnectionError:
+        except exceptions.ConnectionError as err:
+            logger_request_errors.error({
+                "func": "call",
+                "error": err,
+                "method": method,
+                "data": data,
+                "text": r.text
+            })
             result = dict(error=f'Max retries exceeded [{str(adapters.DEFAULT_RETRIES)}]')
+        except Exception as err:
+            logger_request_errors.error({
+                "func": "call",
+                "error": err,
+                "method": method,
+                "data": data,
+                "text": r.text
+            })
 
         if 'error' in result and result['error'] in ('NO_AUTH_FOUND', 'expired_token'):
             result_update_token = self.refresh_tokens()
@@ -117,15 +162,27 @@ class Bitrix24:
 
     def batch(self, cmd):
         if not cmd or not isinstance(cmd, dict):
+            logger_request_errors.error({
+                "func": "batch",
+                "error": "cmd is not dict",
+                "cmd": cmd,
+            })
             return dict(error='Invalid batch structure')
 
-        return self.call(
+        response = self.call(
             'batch',
             {
                 "halt": 0,
                 "cmd": cmd
             }
         )
+        logger_request_success.info({
+            "func": "batch",
+            "cmd": cmd,
+            "state": "post_req",
+            "result": response
+        })
+        return response
 
     # возвращает количество объектов для заданного списочного метода
     def get_count_records(self, method, filters={}):
@@ -134,8 +191,18 @@ class Bitrix24:
             data["filter"] = filters
 
         response = self.call(method, data)
+        logger_request_success.info({
+            "func": "get_count_records",
+            "method": method,
+            "filters": filters,
+            "data": data,
+            "state": "post_req",
+            "result": response
+        })
         if response and 'total' in response:
             return response['total']
+
+        return 0
 
     # формирование команд для batch запросов
     @staticmethod
