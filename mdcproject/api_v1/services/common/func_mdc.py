@@ -80,7 +80,7 @@ def merge_contacts(ids, lock, report):
 
         # Копирование дел {id_contact: [id_activity_1, id_activity_2, ...], ...}
         activities = contact__copy_activities(id_contact_last, ids)
-        contact__copy_calls(id_contact_last, ids)
+        activities_calls = contact__copy_calls(id_contact_last, ids)
 
         # Привязка задач {id_contact: [id_task_1, id_task_2, ...], ...}
         tasks = change_task_binding(id_contact_last, ids, CHAR_CODE_CONTACT)
@@ -99,7 +99,7 @@ def merge_contacts(ids, lock, report):
 
         # Подготоака данных для отчета
         data_old, data_new = preparing_data_for_report(
-            id_contact_last, ids, fields, contacts, comments, activities, tasks
+            id_contact_last, ids, fields, contacts, comments, activities, tasks, activities_calls
         )
 
         logger_report_success.info({
@@ -133,7 +133,7 @@ def merge_contacts(ids, lock, report):
         })
 
 
-def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, activities, tasks):
+def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, activities, tasks, activities_calls):
     """
     :param id_contact_last:
     :param ids:             - [id_contacts, ...]
@@ -148,6 +148,7 @@ def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, 
     summary = {
         "contact_comments": [],
         "contact_activities": [],
+        "contact_activities_calls_": [],
         "contact_tasks": [],
         "contact_deals": [],
         "contact_companies": [],
@@ -168,11 +169,13 @@ def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, 
         companies_contact = Companies.objects.filter(contacts=id_cont).values_list("ID", flat=True)
         comments_ = comments.get(str(id_cont), [])
         activities_ = activities.get(str(id_cont), [])
+        activities_calls_ = activities_calls.get(str(id_cont), [])
         tasks_ = tasks.get(str(id_cont), [])
         contact_ = contacts.get(str(id_cont), [])
         data_contact = {
             "contact_comments": comments_,
             "contact_activities": activities_,
+            "contact_activities_calls_": activities_calls_,
             "contact_tasks": tasks_,
             "contact_deals": list(deals_contact),
             "contact_companies": list(companies_contact),
@@ -180,6 +183,7 @@ def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, 
 
         summary["contact_comments"].extend(comments_)
         summary["contact_activities"].extend(activities_)
+        summary["contact_activities_calls_"].extend(activities_calls_)
         summary["contact_tasks"].extend(tasks_)
         summary["contact_deals"].extend(list(deals_contact))
         summary["contact_companies"].extend(list(companies_contact))
@@ -404,12 +408,21 @@ def contact__copy_calls(origin_contact, contacts):
     for contact_id, calls_ in response["result"]["result"].items():
         calls.extend(calls_)
 
+    activities_obj = {}
     activities = []
     for call_ in calls:
         if call_.get("CRM_ENTITY_TYPE") == "CONTACT" and call_.get("CRM_ACTIVITY_ID"):
             activities.append(call_["CRM_ACTIVITY_ID"])
+            contact_id_ = call_.get("CRM_ENTITY_ID", "")
+            if not activities_obj[contact_id_]:
+                activities_obj[contact_id_] = [call_.get("CRM_ACTIVITY_ID", "-"), ]
+            else:
+                activities_obj[contact_id_].append(call_.get("CRM_ACTIVITY_ID", "-"))
+            # activities_obj[call_.get("CRM_ENTITY_ID", "")]
 
     binding_activities_at_contact(origin_contact, activities)
+
+    return activities_obj
 
 
 def contact__copy_activities(origin_contact, contacts):
