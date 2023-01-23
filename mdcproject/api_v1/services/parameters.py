@@ -6,7 +6,7 @@ BX24__COUNT_METHODS_IN_BATH = 10
 CHAR_CODE_CONTACT = 'C'
 
 # Количество параллельных потоков для обращения к Битрикс
-COUNT_THREAD = 3
+COUNT_THREAD = 2
 
 # способы поиска дубликатов
 DUPLICATES_FIELDS = {

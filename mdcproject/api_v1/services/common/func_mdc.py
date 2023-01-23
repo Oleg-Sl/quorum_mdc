@@ -80,6 +80,7 @@ def merge_contacts(ids, lock, report):
 
         # Копирование дел {id_contact: [id_activity_1, id_activity_2, ...], ...}
         activities = contact__copy_activities(id_contact_last, ids)
+        contact__copy_calls(id_contact_last, ids)
 
         # Привязка задач {id_contact: [id_task_1, id_task_2, ...], ...}
         tasks = change_task_binding(id_contact_last, ids, CHAR_CODE_CONTACT)
@@ -130,8 +131,6 @@ def merge_contacts(ids, lock, report):
             "data": data_old,
             "result_update": data_new
         })
-
-
 
 
 def preparing_data_for_report(id_contact_last, ids, fields, contacts, comments, activities, tasks):
@@ -388,7 +387,33 @@ def contact__copy_comments(origin_contact, contacts):
     return comment_obj
 
 
+def contact__copy_calls(origin_contact, contacts):
+    # ПОЛУЧЕНИЕ ВСЕХ ЗВОНКОВ СВЯЗАННЫХ С ДУБЛИКАТАМИ КОНТАКОВ
+    cmd = {}
+    method_calls_list = "voximplant.statistic.get?FILTER[CRM_ENTITY_TYPE]=CONTACT&FILTER[CRM_ENTITY_ID]={contact}"
+    for ind, contact in enumerate(contacts):
+        if contact == origin_contact or str(contact) == str(origin_contact):
+            continue
+        cmd[contact] = method_calls_list.format(contact=contact)
+
+    response = bx24.batch(cmd)
+    if "result" not in response or "result" not in response["result"]:
+        return
+
+    calls = []
+    for contact_id, calls_ in response["result"]["result"].items():
+        calls.extend(calls_)
+
+    activities = []
+    for call_ in calls:
+        if call_.get("CRM_ENTITY_TYPE") == "CONTACT" and call_.get("CRM_ACTIVITY_ID"):
+            activities.append(call_["CRM_ACTIVITY_ID"])
+
+    binding_activities_at_contact(origin_contact, activities)
+
+
 def contact__copy_activities(origin_contact, contacts):
+    # ПОЛУЧЕНИЕ ВСЕХ АКТИВНОСТЕЙ СВЯЗАННЫХ С ДУБЛИКАТАМИ КОНТАКОВ
     cmd = {}
     method_activity_list = "crm.activity.list?filter[OWNER_TYPE_ID]=3&filter[OWNER_ID]={contact}&select[]=ID"
     for ind, contact in enumerate(contacts):
@@ -445,13 +470,21 @@ def contact__copy_activities(origin_contact, contacts):
             lst.append(activity_.get("ID", "-"))
         activities_obj[contact] = lst
 
+    binding_activities_at_contact(origin_contact, [activity["ID"] for activity in activities_list])
+
+    return activities_obj
+
+
+def binding_activities_at_contact(origin_contact, activities):
+    # ПРИВЯЗКА ОРИГИНАЛЬНОГО КОНТАКТА К АКТИВНОСТЯМ СВЯЗАННЫХ С ДУБЛИКАТОМ КОНТАКТА
     cmd = {}
     method_activity_add = "crm.activity.binding.add?activityId={activity}&" \
                           "entityTypeId=3&" \
                           "entityId={origin_contact}"
-    for activity in activities_list:
-        key = activity["ID"]
-        cmd[key] = method_activity_add.format(activity=activity["ID"], origin_contact=origin_contact)
+    for activity in activities:
+        # key = activity["ID"]
+        key = activity
+        cmd[key] = method_activity_add.format(activity=activity, origin_contact=origin_contact)
 
     i = 1
     cmd_list = []
@@ -471,8 +504,6 @@ def contact__copy_activities(origin_contact, contacts):
         response = bx24.batch(cmd)
         if "result" not in response or "result" not in response["result"]:
             return
-
-    return activities_obj
 
 
 def change_task_binding(origin_contact, contacts, crm_type):
@@ -563,4 +594,3 @@ def change_task_binding(origin_contact, contacts, crm_type):
             return
 
     return tasks_obj
-
