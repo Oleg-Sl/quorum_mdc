@@ -420,7 +420,7 @@ def contact__copy_calls(origin_contact, contacts):
         if call_.get("CRM_ENTITY_TYPE") == "CONTACT" and call_.get("CRM_ACTIVITY_ID"):
             activities.append(call_["CRM_ACTIVITY_ID"])
             contact_id_ = call_.get("CRM_ENTITY_ID", "")
-            if not activities_obj[contact_id_]:
+            if not activities_obj.get(contact_id_):
                 activities_obj[contact_id_] = [call_.get("CRM_ACTIVITY_ID", "-"), ]
             else:
                 activities_obj[contact_id_].append(call_.get("CRM_ACTIVITY_ID", "-"))
