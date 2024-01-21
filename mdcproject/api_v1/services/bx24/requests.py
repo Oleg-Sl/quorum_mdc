@@ -15,14 +15,14 @@ from ..parameters import BX24__COUNT_METHODS_IN_BATH, BX24__COUNT_RECORDS_IN_MET
 
 logger_request_success = logging.getLogger('request_success')
 logger_request_success.setLevel(logging.INFO)
-fh_request_success = logging.handlers.TimedRotatingFileHandler('./logs/request_success/success.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+fh_request_success = logging.handlers.TimedRotatingFileHandler('./logs/request_success/success.log', when='D', interval=1, encoding="cp1251", backupCount=7)
 formatter_request_success = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
 fh_request_success.setFormatter(formatter_request_success)
 logger_request_success.addHandler(fh_request_success)
 
 logger_request_errors = logging.getLogger('request_errors')
 logger_request_errors.setLevel(logging.INFO)
-fh_request_errors = logging.handlers.TimedRotatingFileHandler('./logs/request_errors/errors.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+fh_request_errors = logging.handlers.TimedRotatingFileHandler('./logs/request_errors/errors.log', when='D', interval=1, encoding="cp1251", backupCount=7)
 formatter_request_errors = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
 fh_request_errors.setFormatter(formatter_request_errors)
 logger_request_errors.addHandler(fh_request_errors)

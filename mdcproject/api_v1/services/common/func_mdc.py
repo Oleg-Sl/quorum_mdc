@@ -9,14 +9,14 @@ from api_v1.models import Email, Contacts, Companies, Deals
 
 logger_report_success = logging.getLogger('report_success')
 logger_report_success.setLevel(logging.INFO)
-fh_report_success = logging.handlers.TimedRotatingFileHandler('./logs/report_success/success.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+fh_report_success = logging.handlers.TimedRotatingFileHandler('./logs/report_success/success.log', when='D', interval=1, encoding="cp1251", backupCount=7)
 formatter_report_success = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
 fh_report_success.setFormatter(formatter_report_success)
 logger_report_success.addHandler(fh_report_success)
 
 logger_report_errors = logging.getLogger('report_errors')
 logger_report_errors.setLevel(logging.INFO)
-fh_report_errors = logging.handlers.TimedRotatingFileHandler('./logs/report_errors/errors.log', when='D', interval=1, encoding="cp1251", backupCount=30)
+fh_report_errors = logging.handlers.TimedRotatingFileHandler('./logs/report_errors/errors.log', when='D', interval=1, encoding="cp1251", backupCount=7)
 formatter_report_errors = logging.Formatter('[%(asctime)s] %(levelname).1s %(message)s')
 fh_report_errors.setFormatter(formatter_report_errors)
 logger_report_errors.addHandler(fh_report_errors)
