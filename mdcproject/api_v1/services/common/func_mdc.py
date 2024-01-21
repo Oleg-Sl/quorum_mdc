@@ -1,6 +1,7 @@
 import logging
 from pprint import pprint
 import traceback
+import sys
 
 from . import merge_fields
 from ..parameters import TYPE_MERGE_FIELD, BX24__COUNT_METHODS_IN_BATH, CHAR_CODE_CONTACT
@@ -126,13 +127,14 @@ def merge_contacts(ids, lock, report):
 
     except Exception as err:
         traceback_str = traceback.format_exc()
+        exc_info=sys.exc_info()
         logger_report_success.info({
             "id_contact_last": id_contact_last,
             "ids": ids,
             "error": err,
             "data": data_old,
             "result_update": data_new,
-            "traceback": traceback_str
+            "traceback": exc_info
         })
 
 
