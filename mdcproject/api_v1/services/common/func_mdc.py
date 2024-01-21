@@ -125,13 +125,14 @@ def merge_contacts(ids, lock, report):
         lock.release()
 
     except Exception as err:
+        traceback_str = traceback.format_exc()
         logger_report_success.info({
             "id_contact_last": id_contact_last,
             "ids": ids,
             "error": err,
             "data": data_old,
             "result_update": data_new,
-            "traceback": traceback.print_exc()
+            "traceback": traceback_str
         })
 
 
