@@ -1,5 +1,6 @@
 import logging
 from pprint import pprint
+import traceback
 
 from . import merge_fields
 from ..parameters import TYPE_MERGE_FIELD, BX24__COUNT_METHODS_IN_BATH, CHAR_CODE_CONTACT
@@ -129,7 +130,8 @@ def merge_contacts(ids, lock, report):
             "ids": ids,
             "error": err,
             "data": data_old,
-            "result_update": data_new
+            "result_update": data_new,
+            "traceback": traceback.print_exc()
         })
 
 
